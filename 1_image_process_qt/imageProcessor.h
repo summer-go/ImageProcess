@@ -4,6 +4,9 @@
 #include <QObject>
 #include <QString>
 
+/**
+图像处理
+*/
 class ImageProcessorPrivate;
 
 class ImageProcessor : public QObject
