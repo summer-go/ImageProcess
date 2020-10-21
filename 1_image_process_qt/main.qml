@@ -30,11 +30,14 @@ import QtQuick.Controls.Styles 1.1
         }
 
         Image {
+
+            anchors.left: parent.left;
+            anchors.top: parent.top;
             objectName: "imageViewer";
             id: imageViewer;
             asynchronous: true;
             anchors.fill: parent;
-            fillMode: Image.PreserveAspectFit;
+//            fillMode: Image.PreserveAspectFit;
             onStatusChanged: {
                 if (imageViewer.status === Image.Loading) {
                     busy.running = true;
@@ -49,12 +52,35 @@ import QtQuick.Controls.Styles 1.1
                     stateLabel.text = "ERROR";
                 }
             }
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    var pox = (mouseX / 640) *imageViewer.sourceSize.width;
+                    var poy = (mouseY / 480) * imageViewer.sourceSize.height;
+                    console.log("pox = ", pox, "poy = ", poy);
+                    processor.getPix(fileDialog.fileUrl, pox, poy);
+                }
+            }
         }
 
+
+
         ImageProcessor {
+
+            function rgba(a,r,g,b){
+                var ret = (r << 16 | g << 8 | b);
+                var strRet =  ("#" + a.toString(16) + ret.toString(16)).toUpperCase();
+                return strRet;
+            }
+
             id: processor;
             onFinished: {
                 imageViewer.source = "file:///" +newFile;
+            }
+            onGetPixDone: {
+                var selectColor = rgba(list[0], list[1],list[2],list[3]);
+                position.color = selectColor;
+                positionTex.text = selectColor;
             }
         }
 
@@ -63,7 +89,6 @@ import QtQuick.Controls.Styles 1.1
             title: "Please choose a file";
             nameFilters: ["Image Files (*.jpeg *.jpg *.png *.gif)"];
             onAccepted: {
-                console.log("select file: " + fileDialog.fileUrl);
                 imageViewer.source = fileDialog.fileUrl;
             }
         }
@@ -115,6 +140,25 @@ import QtQuick.Controls.Styles 1.1
             z: 1;
         }
 
+        Rectangle{
+            id: position
+            width: 130;
+            height: 50;
+            anchors.left: parent.left;
+            anchors.leftMargin: 6;
+            anchors.top: openFile.bottom;
+            anchors.topMargin: 20;
+            color: "lightsteelblue";
+            Text {
+                id:positionTex
+                anchors.left: parent.left;
+                anchors.top: parent.top;
+                text: qsTr("坐标")
+                font.pixelSize: 24
+            }
+        }
+
+
         Rectangle {
             anchors.left: parent.left;
             anchors.top: parent.top;
@@ -162,14 +206,14 @@ import QtQuick.Controls.Styles 1.1
                 }
             }
             Button {
-                text: "⿊⽩";
+                text: qsTr("⿊⽩");
                 style: btnStyle;
                 onClicked: {
                     busy.running = true;
                     processor.process(fileDialog.fileUrl, ImageProcessor.Binarize);
                 }
             }Button {
-                text: "底⽚";
+                text: "底⽚"
                 style: btnStyle;
                 onClicked: {
                     busy.running = true;

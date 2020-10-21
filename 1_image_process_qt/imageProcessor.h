@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QString>
+#include <QVariant>
+#include <QVariantList>
 
 /**
 图像处理
@@ -37,10 +39,13 @@ public:
 signals:
     void finished(QString newFile);
     void progress(int value);
+    void getPixDone(QVariant list);
+
 
 public slots:
     void process(QString file, ImageAlgorithm algorithm);
     void abort(QString file, ImageAlgorithm algorithm);
+    void getPix(QString file, int x, int y);
 
 private:
     ImageProcessorPrivate *m_d;

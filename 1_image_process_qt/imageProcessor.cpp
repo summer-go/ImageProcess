@@ -12,6 +12,8 @@
 #include <QDebug>
 #include <QDir>
 #include <QImageReader>
+#include <QBitmap>
+#include <qpixmap.h>
 
 typedef void (*AlgorithmFunction)(QString sourceFile, QString destFile);
 
@@ -449,4 +451,49 @@ void ImageProcessor::abort(QString file, ImageAlgorithm algorithm)
             break;
         }
     }
+}
+
+int f_getPixel(unsigned char *srcData, int width, int height, int stride, int x, int y, int argb[4])
+{
+    x = x < 0 ? 0 : (x > width - 1 ? width - 1 : x);
+    y = y < 0 ? 0 : (y > height - 1 ? height - 1 : y);
+    int ret = 0;
+    if(srcData == nullptr)
+    {
+        printf("input image is null!");
+        return -1;
+    }
+    //Process
+    int pos = x * 4 + y * stride;
+    argb[0] = srcData[pos + 3];
+    argb[1] = srcData[pos + 2];
+    argb[2] = srcData[pos + 1];
+    argb[3] = srcData[pos + 0];
+    return ret;
+}
+
+void ImageProcessor::getPix(QString sourceFile, int x, int y)
+{
+    const QUrl url(sourceFile);
+    if (url.isLocalFile()) {
+        sourceFile = QDir::toNativeSeparators(url.toLocalFile());
+    }
+    QImage image(sourceFile);
+    if(image.isNull())
+    {
+        return;
+    }
+    unsigned char *data = image.bits();
+    int w = image.width();
+    int h = image.height();
+    int stride = image.bytesPerLine();
+    int argb[4];
+    f_getPixel(data, w, h, stride, x, y, argb);
+    QVariantList list;
+    list<<argb[0]<<argb[1]<<argb[2]<<argb[3];
+
+    qDebug()<<"argb a = "<< argb[0]<< " r= " << argb[1]<< " g = " << argb[2] << " b = "<< argb[3] << endl;
+    qDebug()<<"list a = "<< list[0]<< " r= " << list[1]<< " g = " << list[2] << " b = "<< list[3] << endl;
+
+    emit getPixDone(QVariant::fromValue(list));
 }
