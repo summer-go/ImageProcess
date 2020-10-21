@@ -16,7 +16,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         ImageProcessor.cpp \
-        main.cpp
+        main.cpp \
+        trgb2hsv.cpp
 
 RESOURCES += qml.qrc
 
@@ -32,4 +33,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    ImageProcessor.h
+    ImageProcessor.h \
+    commen.h \
+    trgb2hsv.h
